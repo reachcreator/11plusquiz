@@ -1,0 +1,183 @@
+{% extends 'reasoning/base.html' %}
+
+{% block title %}Play - 11+ Reasoning Master{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <span style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.9rem;">
+            {{ mode|title|default:"CEM Simulator" }}
+        </span>
+        <span id="question-counter" style="color: var(--accent-primary); font-weight: 600;">
+            Question 1 of {{ questions|length }}
+        </span>
+    </div>
+    
+    <!-- Timer -->
+    <div class="timer-bar">
+        <div id="timer-fill" class="timer-fill" style="width: 100%;"></div>
+    </div>
+    <!-- Score -->
+    <div style="text-align: center; margin: 1rem 0;">
+        <span style="color: var(--text-secondary);">Score: </span>
+        <span id="score" class="score" style="font-size: 2rem;">0</span>
+    </div>
+</div>
+
+{% for question in questions %}
+<div class="card question-card" id="question-{{ forloop.counter }}" {% if not forloop.first %}style="display: none;"{% endif %}%>
+    <div class="question-text">
+        {{ question.question_text }}
+    </div>
+    
+    <div class="options">
+        {% for option in question.options %}
+        <button class="option" onclick="checkAnswer('{{ question.id }}', '{{ option }}', this)">
+            {{ option }}
+        </button>
+        {% endfor %}
+    </div>
+    
+    <div class="explanation" id="explanation-{{ question.id }}">
+        <strong style="color: var(--accent-primary);">Answer: {{ question.answer }}</strong>
+        <p><strong>Explanation:</strong> {{ question.explanation }}</p>
+        <p><strong>💡 Technique:</strong> {{ question.technique }}</p>
+        
+        <button class="btn" onclick="nextQuestion()" style="margin-top: 1rem;">
+            Next Question →
+        </button>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Results screen (hidden initially) -->
+<div id="results" class="card" style="display: none; text-align: center;">
+    <h2>🎉 Round Complete!</h2>
+    
+    <div class="score" id="final-score">0/0</div>
+    
+    <p id="feedback" style="font-size: 1.2rem; margin: 1rem 0;"></p>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/game/" class="btn">Play Again</a>
+        <a href="/" class="btn btn-secondary" style="margin-left: 1rem;">Back to Home</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentQuestion = 1;
+let totalQuestions = {{ questions|length }};
+let score = 0;
+let timer;
+let timeLeft = 45; // 45 seconds per question
+
+// Start timer for first question
+startTimer();
+
+function startTimer() {
+    timeLeft = 45;
+    updateTimerDisplay();
+    
+    timer = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            // Auto move to next or show timeout
+            showTimeout();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const percentage = (timeLeft / 45) * 100;
+    document.getElementById('timer-fill').style.width = percentage + '%';
+}
+
+function showTimeout() {
+    // Could show "Time's up" message
+}
+
+function checkAnswer(questionId, selectedAnswer, buttonElement) {
+    clearInterval(timer);
+    
+    // Disable all options
+    const buttons = buttonElement.parentElement.querySelectorAll('.option');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    // Check answer via AJAX
+    fetch('/check-answer/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `question_id=${questionId}&answer=${encodeURIComponent(selectedAnswer)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.correct) {
+            buttonElement.classList.add('correct');
+            score++;
+            document.getElementById('score').textContent = score;
+        } else {
+            buttonElement.classList.add('wrong');
+            // Highlight correct answer
+            buttons.forEach(btn => {
+                if (btn.textContent.trim() === data.correct_answer) {
+                    btn.classList.add('correct');
+                }
+            });
+        }
+        
+        // Show explanation
+        document.getElementById(`explanation-${questionId}`).classList.add('show');
+    });
+}
+
+function nextQuestion() {
+    // Hide current question
+    document.getElementById(`question-${currentQuestion}`).style.display = 'none';
+    
+    currentQuestion++;
+    
+    if (currentQuestion > totalQuestions) {
+        // Show results
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('final-score').textContent = `${score}/${totalQuestions}`;
+        
+        const percentage = (score / totalQuestions) * 100;
+        let feedback = '';
+        if (percentage >= 80) feedback = '🌟 Excellent! You\'re CEM-ready!';
+        else if (percentage >= 60) feedback = '👍 Good job! Keep practicing!';
+        else feedback = '💪 Keep training! Speed comes with practice.';
+        
+        document.getElementById('feedback').textContent = feedback;
+    } else {
+        // Show next question
+        document.getElementById(`question-${currentQuestion}`).style.display = 'block';
+        document.getElementById('question-counter').textContent = `Question ${currentQuestion} of ${totalQuestions}`;
+        startTimer();
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

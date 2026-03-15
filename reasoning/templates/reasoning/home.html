@@ -1,0 +1,55 @@
+{% extends 'reasoning/base.html' %}
+
+{% block title %}11+ Reasoning Master - CEM Prep{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 3rem;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">🚀 Master 11+ CEM Reasoning</h1>
+    <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
+        Train for the Stratford Grammar School entrance exam with fast-paced, 
+        CEM-style reasoning games. Build speed, accuracy, and confidence.
+    </p>
+    
+    <a href="/game/" class="btn" style="font-size: 1.2rem; padding: 1.2rem 2.5rem;">
+        🎮 Start Playing
+    </a>
+</div>
+
+<h2 style="text-align: center; margin-top: 3rem; margin-bottom: 1rem;">Choose Your Training Mode</h2>
+
+<div class="game-modes">
+    <a href="/game/cem_simulator/" class="mode-card">
+        <div class="mode-icon">🎯</div>
+        <h3>CEM Simulator</h3>
+        <p style="color: var(--text-secondary);">Mixed questions just like the real exam. Test your speed and adaptability.</p>
+    </a>
+    
+    <a href="/game/non_verbal/" class="mode-card">
+        <div class="mode-icon">🔺</div>
+        <h3>Non-Verbal Reasoning</h3>
+        <p style="color: var(--text-secondary);">Patterns, sequences, and spatial challenges.</p>
+    </a>
+    
+    <a href="/game/verbal/" class="mode-card">
+        <div class="mode-icon">🔤</div>
+        <h3>Verbal Reasoning</h3>
+        <p style="color: var(--text-secondary);">Letter codes, word patterns, and sequences.</p>
+    </a>
+    
+    <a href="/game/spatial/" class="mode-card">
+        <div class="mode-icon">🧊</div>
+        <h3>Spatial Reasoning</h3>
+        <p style="color: var(--text-secondary);">3D visualization, nets, and rotations.</p>
+    </a>
+</div>
+
+<div class="card" style="margin-top: 3rem;">
+    <h3>📊 Your Progress</h3>
+    <p style="color: var(--text-secondary);">
+        Total questions in database: <strong style="color: var(--accent-primary);">{{ total_questions|default:"300+" }}</strong>
+    </p>
+    <p style="color: var(--text-secondary);">
+        Start practicing now to build the speed and accuracy needed for CEM success!
+    </p>
+</div>
+{% endblock %}
