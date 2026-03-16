@@ -43,13 +43,28 @@
     </a>
 </div>
 
-<div class="card" style="margin-top: 3rem;">
+<div class="card" style="margin-top: 3rem;" id="progress-card">
     <h3>📊 Your Progress</h3>
-    <p style="color: var(--text-secondary);">
-        Total questions in database: <strong style="color: var(--accent-primary);">{{ total_questions|default:"300+" }}</strong>
+    <p id="progress-text" style="color: var(--text-secondary);">
+        Total questions in database: <strong style="color: var(--accent-primary);">300+</strong>
     </p>
+    <div id="saved-progress" style="display: none;">
+        <p>Previous score: <strong id="saved-score" style="color: var(--accent-primary);">0</strong></p>
+        <p>Last played: <span id="last-played">-</span></p>
+    </div>
     <p style="color: var(--text-secondary);">
         Start practicing now to build the speed and accuracy needed for CEM success!
     </p>
 </div>
+
+<script>
+// Load and display saved progress
+const saved = localStorage.getItem('elevenPlus_progress');
+if (saved) {
+    const progress = JSON.parse(saved);
+    document.getElementById('saved-progress').style.display = 'block';
+    document.getElementById('saved-score').textContent = progress.score || 0;
+    document.getElementById('last-played').textContent = new Date(progress.lastPlayed).toLocaleDateString();
+}
+</script>
 {% endblock %}

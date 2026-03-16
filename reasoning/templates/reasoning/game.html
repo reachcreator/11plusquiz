@@ -136,6 +136,9 @@ function checkAnswer(questionId, selectedAnswer, buttonElement) {
         
         // Show explanation
         document.getElementById(`explanation-${questionId}`).classList.add('show');
+        
+        // Save progress
+        saveProgress();
     });
 }
 
